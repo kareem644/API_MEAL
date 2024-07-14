@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meal Areas</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome for icons (optional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />  <style>
+    /* Additional custom styles if needed */
+    .area-name {
+      cursor: pointer;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    body{
+        background-color: black;
+        color: white;
+    }
+  </style>
+</head>
+<body>
+    
+<div class="navbar-container"></div>
+  <div class="container">
+    <h2 class="mt-4 mb-3">Meal Areas</h2>
+    <div class="row" id="areaList">
+      <!-- Area names with home icon will be dynamically inserted here -->
+    </div>
+    <div class="row mt-4">
+      <div class="col" id="areaDetails">
+        <!-- Area details will be dynamically inserted here -->
+      </div>
+    </div>
+  </div>
+  <script src="./js/main.js"></script>
+
+  <script>
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('https://www.themealdb.com/api/json/v1/1/list.php?a=list')
+        .then(response => response.json())
+        .then(data => {
+          const areaListContainer = document.getElementById('areaList');
+          const areas = data.meals;
+
+          areas.forEach(area => {
+            const areaName = area.strArea;
+            const col = document.createElement('div');
+            col.classList.add('col-6', 'col-md-4', 'col-lg-3'); // Adjust column size as needed
+            const areaDiv = document.createElement('div');
+            areaDiv.classList.add('area-name', 'text-center', 'd-flex', 'align-items-center');
+            areaDiv.innerHTML = `<i class="fas fa-home mr-2"></i>${areaName}`;
+            areaDiv.addEventListener('click', () => displayAreaDetails(areaName));
+            col.appendChild(areaDiv);
+            areaListContainer.appendChild(col);
+          });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+
+      function displayAreaDetails(areaName) {
+        fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?a=${areaName}`)
+          .then(response => response.json())
+          .then(data => {
+            const areaDetailsDiv = document.getElementById('areaDetails');
+            areaDetailsDiv.innerHTML = ''; // Clear previous details
+
+            const meals = data.meals;
+            if (meals) {
+              meals.forEach(meal => {
+                const mealName = meal.strMeal;
+                const p = document.createElement('p');
+                p.textContent = mealName;
+                areaDetailsDiv.appendChild(p);
+              });
+            } else {
+              const p = document.createElement('p');
+              p.textContent = 'No meals found for this area.';
+              areaDetailsDiv.appendChild(p);
+            }
+          })
+          .catch(error => console.error('Error fetching area details:', error));
+      }
+    });
+    
+  </script>
+
+</body>
+</html>
